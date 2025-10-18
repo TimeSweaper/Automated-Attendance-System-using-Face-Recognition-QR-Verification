@@ -69,7 +69,6 @@ After scanning, the student’s **face is captured and verified** using machine 
 - Django-based **web application** for teachers and students.  
 - Real-time **face recognition attendance marking**.  
 - Secure **QR-based verification system**.  
-- **Admin dashboard** for managing users and reports.  
 - Complete **documentation, database schema, and user guide**.
 
 ---
