@@ -14,3 +14,26 @@ python script, which uses the pre-trained ML model to match the student face wit
 registration), if the photo is matched then the attendance is marked “Present”. The marked student details such as
 student name, student ID, and the exact time of marking are automatically added to the attendance file.
 This is the basic flow of our project that are we going to implement.
+
+
+
+
+
+
+
+We have upgraded some of the part of our system like we have now added button where teacher  can see students live attendance in their respective dashboard and we added new feature like lock session when teacher start a session he/she can lock that particular session so that no  extra student can join the lecture meaning student can’t mark themselves present when they are not present inside the class and instead of using the .pkl file to save embedding we are using json file to  save the student face embedding and we are using different formula to calculate to measure to check the similarity between the two facial encoding (One that was stored during registration  and second was when student start taking attendance)or not at first we were using the cosine similarity and now we are using Euclidean distance to calculate the similarity between two facial encoding  these are some of the feature we are current added in our project . 
+
+Moule/Liabraries  Used:
+Module Name	Used for/Purpose	Status
+Mysql.connector	Connecting database	completed
+json	To store embedding of images	completed
+csv	Convert attendance data into csv file	completed
+os	Create Directory for storing (face data)	completed
+numpy	Use in getting result of Euclidean distance.	completed
+Facenet_pytorch(torch)	Use to access module like MTCNN,InceptionResnetV1	completed
+MTCNN	Crop the image	completed
+InceptionResnetV1	To get the embedding of the image	completed
+qrcode	Use to create QR code that is generated when teacher start their session	completed
+django	To create UI	Not complete
+Flask (Flask,jsonify, request)	Use to connect the front-end with backend	Not complete
+
