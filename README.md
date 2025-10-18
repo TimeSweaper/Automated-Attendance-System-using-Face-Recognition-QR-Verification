@@ -82,3 +82,7 @@ After scanning, the student’s **face is captured and verified** using machine 
 - **Jupyter Notebook:** For testing and checking if Euclidean distance work effectively or not  
 
 ---
+---
+**Create Virtual Environment**
+-**Install MTCNN,InceptionResnetV1**: pip install facenet-pytorch  
+---
