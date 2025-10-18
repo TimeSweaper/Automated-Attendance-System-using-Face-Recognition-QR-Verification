@@ -83,6 +83,6 @@ After scanning, the student’s **face is captured and verified** using machine 
 
 ---
 ---
-##Create Virtual Environment**
+## Create Virtual Environment
 - **Install MTCNN,InceptionResnetV1**: pip install facenet-pytorch  
 ---
