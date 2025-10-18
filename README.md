@@ -83,10 +83,3 @@ After scanning, the student’s **face is captured and verified** using machine 
 - **Jupyter Notebook:** For testing and checking if Euclidean distance work effectively or not  
 
 ---
-
-## ⚙️ Setup Instructions
-
-### 1️⃣ Clone the repository
-```bash
-git clone https://github.com/yourusername/Automated-Attendance-System.git
-cd Automated-Attendance-System
