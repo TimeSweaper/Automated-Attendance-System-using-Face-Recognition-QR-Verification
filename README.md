@@ -1,39 +1,92 @@
-# Automated-Attendance-System-using-Face-Recognition-QR-Verification
+# 🧠 Automated Attendance System using Face Recognition & QR Verification
 
-To make the attendance system working, we began thinking what we can do so that the student in the classroom
-can instantly mark their attendance without having to say “Present Mam/Sir”. To solve this problem, we are going
-to use some ML (Machine Learning) model that can detect the face of the student with the data provided by the
-student during registration.
-In this project, we have a teacher and student portal. Through these portals, student can view their attendance
-details, while teacher can see the details of the student. In the teacher portal, a button is provided that allow teacher
-to generate a QR code for a limited amount of time. On student portal a notification will appear when attendance
-marking has started. Student have to click the icon saying mark attendance in the student portal to Mark
-Attendance after clicking the icon the camera will automatically open in the student device through which student
-can scan the QR code after successfully scanning, then their front camera captures a photo. This photo is sent to a
-python script, which uses the pre-trained ML model to match the student face with the provided data (at the time of
-registration), if the photo is matched then the attendance is marked “Present”. The marked student details such as
-student name, student ID, and the exact time of marking are automatically added to the attendance file.
-This is the basic flow of our project that are we going to implement.
+## 📋 Overview
+The **Automated Attendance System** is designed to modernize traditional attendance methods by leveraging **facial recognition** and **QR verification**.  
+This system allows teachers to start an attendance session by generating a **unique QR code**, while students can mark their attendance by scanning it.  
+After scanning, the student’s **face is captured and verified** using machine learning models to ensure authenticity — preventing proxy attendance and duplicate marking.
 
+---
 
+## 🚀 Key Features
+- 👨‍🏫 **Teacher Dashboard:**  
+  - View real-time student attendance.  
+  - Start/stop attendance sessions.  
+  - Lock sessions to prevent late entries.  
 
+- 🧑‍🎓 **Student Portal:**  
+  - Receive live notifications when attendance begins.  
+  - Scan QR code and automatically mark attendance through face detection.  
+  - View personal attendance history.
 
+- 🔐 **Security Enhancements:**  
+  - Session locking to prevent multiple attendance attempts.  
+  - Euclidean distance–based face similarity check.  
+  - Database constraints to prevent duplicate records.  
 
+- 🧠 **Machine Learning Integration:**  
+  - Uses `MTCNN` for face detection.  
+  - Uses `InceptionResNetV1` for feature extraction (face embedding).  
+  - Compares embeddings using **Euclidean** or **Cosine Similarity**.  
 
+---
 
-We have upgraded some of the part of our system like we have now added button where teacher  can see students live attendance in their respective dashboard and we added new feature like lock session when teacher start a session he/she can lock that particular session so that no  extra student can join the lecture meaning student can’t mark themselves present when they are not present inside the class and instead of using the .pkl file to save embedding we are using json file to  save the student face embedding and we are using different formula to calculate to measure to check the similarity between the two facial encoding (One that was stored during registration  and second was when student start taking attendance)or not at first we were using the cosine similarity and now we are using Euclidean distance to calculate the similarity between two facial encoding  these are some of the feature we are current added in our project . 
+## 🧩 Modules / Libraries Used
 
-Moule/Liabraries  Used:
-Module Name	Used for/Purpose	Status
-Mysql.connector	Connecting database	completed
-json	To store embedding of images	completed
-csv	Convert attendance data into csv file	completed
-os	Create Directory for storing (face data)	completed
-numpy	Use in getting result of Euclidean distance.	completed
-Facenet_pytorch(torch)	Use to access module like MTCNN,InceptionResnetV1	completed
-MTCNN	Crop the image	completed
-InceptionResnetV1	To get the embedding of the image	completed
-qrcode	Use to create QR code that is generated when teacher start their session	completed
-django	To create UI	Not complete
-Flask (Flask,jsonify, request)	Use to connect the front-end with backend	Not complete
+| Module Name | Purpose / Usage | Status |
+|--------------|----------------|--------|
+| `mysql.connector` | Connect to MySQL database | ✅ Completed |
+| `json` | Store embedding of images | ✅ Completed |
+| `csv` | Export attendance data | ✅ Completed |
+| `os` | Directory creation for face data | ✅ Completed |
+| `numpy` | Perform Euclidean distance calculations | ✅ Completed |
+| `facenet_pytorch` | Access ML models (`MTCNN`, `InceptionResNetV1`) | ✅ Completed |
+| `MTCNN` | Crop the detected face | ✅ Completed |
+| `InceptionResNetV1` | Generate face embeddings | ✅ Completed |
+| `qrcode` | Generate unique QR codes per session | ✅ Completed |
+| `django` | Create full web-based UI | 🔄 In Progress |
+| `flask` | Temporary frontend-backend connection (testing) | 🔄 In Progress |
 
+---
+
+## 🧮 Working Principle
+1. **Teacher Login:**  
+   The teacher starts a class session and generates a QR code valid for a short time.
+
+2. **Student Action:**  
+   Students log into their portal, scan the displayed QR code, and the system activates their webcam.
+
+3. **Face Recognition:**  
+   The captured image is compared with stored facial embeddings from registration using **Euclidean distance**.
+
+4. **Attendance Marking:**  
+   If similarity is above the threshold, the student’s attendance is marked as *Present* with timestamp, student ID, and name.
+
+5. **Data Storage:**  
+   Attendance details are saved in a **MySQL database** and can be exported to `.csv` for record-keeping.
+
+---
+
+## 📦 Project Deliverables
+- Django-based **web application** for teachers and students.  
+- Real-time **face recognition attendance marking**.  
+- Secure **QR-based verification system**.  
+- **Admin dashboard** for managing users and reports.  
+- Complete **documentation, database schema, and user guide**.
+
+---
+
+## 🛠️ Tools & Technologies
+- **Languages:** Python, HTML, CSS, JavaScript  
+- **Frameworks:** Django, Flask  
+- **Libraries:** OpenCV, NumPy, FaceNet-PyTorch, MTCNN, qrcode  
+- **Database:** MySQL  
+- **IDE:** Visual Studio Code / PyCharm  
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone the repository
+```bash
+git clone https://github.com/yourusername/Automated-Attendance-System.git
+cd Automated-Attendance-System
