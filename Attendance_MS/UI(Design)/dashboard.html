@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(120deg, #6a11cb, #2575fc);
+      margin: 0;
+      color: #222;
+    }
+
+    
+    .navbar {
+      background: #fff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .navbar a {
+      text-decoration: none;
+      color: #333;
+      margin: 0 10px;
+      font-weight: 500;
+    }
+    .navbar a:hover {
+      color: #2575fc;
+    }
+
+    
+    .dashboard-container {
+      max-width: 1100px;
+      margin: 30px auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .profile-section {
+      background: #f3f3f3;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+    }
+    .profile-section img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: #ddd;
+      margin-right: 20px;
+    }
+    .profile-section p {
+      margin: 5px 0;
+      line-height: 1.4;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .card {
+      flex: 1;
+      min-width: 300px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin-bottom: 15px;
+      color: #2575fc;
+    }
+    .card button {
+      background: #2575fc;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px 0;
+    }
+    .card button:hover {
+      background: #1b5fd8;
+    }
+
+    .logout-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .logout-container a {
+      background: #e74c3c;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .logout-container a:hover {
+      background: #c0392b;
+    }
+
+    @media (max-width: 768px) {
+      .row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+ 
+
+  <div class="dashboard-container">
+    <h1>Student Dashboard</h1>
+
+    <div class="profile-section">
+      <img src="" alt="No Photo">
+      <div>
+        <p><strong>Name:</strong> - </p>
+        <p><strong>Email:</strong> - </p>
+        <p><strong>Course:</strong> - </p>
+        <p><strong>Subjects:</strong> - </p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h3>Scan Session QR</h3>
+        <button>Start QR Scanner</button>
+        <button>Stop QR Scanner</button>
+        <p>Detected Session ID:</p>
+        <input type="text" placeholder="e.g. 12">
+        <button>Use This ID</button>
+      </div>
+
+      <div class="card">
+        <h3>Capture Face & Join</h3>
+        <div style="width:100%; height:180px; background:#000; border-radius:10px;"></div>
+        <button>Start Camera</button>
+        <button>Capture & Mark Present</button>
+      </div>
+    </div>
+
+    <div class="logout-container">
+      <a href="login.html">Logout</a>
+    </div>
+  </div>
+
+  <script>
+    const today = new Date();
+    document.getElementById("date").innerText = today.toDateString();
+  </script>
+</body>
+</html>

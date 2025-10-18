@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f7f9fc;
+      color: #222;
+    }
+
+    .navbar {
+      background: #007bff;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+    .navbar a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: 500;
+    }
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .dashboard-container {
+      max-width: 1200px;
+      background: white;
+      margin: 30px auto;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+
+    .teacher-info {
+      display: flex;
+      align-items: center;
+      background: #f1f1f1;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+    }
+    .teacher-info img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #ddd;
+      margin-right: 20px;
+    }
+    .teacher-info p {
+      margin: 4px 0;
+    }
+
+    .controls input[type="text"] {
+      padding: 8px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 160px;
+    }
+    .controls button {
+      padding: 8px 15px;
+      margin: 5px;
+      background: #007bff;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    .logout-container {
+      text-align: right;
+      margin-top: 20px;
+    }
+    .logout-container a {
+      background: #e74c3c;
+      color: white;
+      padding: 8px 15px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+    .logout-container a:hover {
+      background: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+
+
+  <div class="dashboard-container">
+    <h1>Teacher Dashboard</h1>
+
+    <div class="teacher-info">
+      <img src="s.jpg" alt="Teacher Photo">
+      <div>
+        <p><strong>Name:</strong> S</p>
+        <p><strong>Email:</strong> Sakshammitthal@gmail.com</p>
+        <p><strong>Department:</strong> CSE</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <input type="text" placeholder="Subject">
+      <input type="text" placeholder="Section">
+      <button>Start Session + Generate QR</button><br>
+      <input type="text" placeholder="Session ID">
+      <button>Lock Session</button>
+      <input type="text" placeholder="Session ID">
+      <button>Stop Session</button>
+      <input type="text" placeholder="Session ID">
+      <button>Export CSV</button>
+    </div>
+
+    <h3 style="margin-top: 30px;">Live Attendance</h3>
+    <div class="controls">
+      <input type="text" placeholder="View Session ID">
+      <button>Reload Now</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Marked At</th>
+          <th>Status</th>
+          <th>Method</th>
+          <th>Name</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="6">Error: bad_session_id</td></tr>
+      </tbody>
+    </table>
+
+    <div class="logout-container">
+      <a href="login.html">Logout</a>
+
+    </div>
+    
+  </div>
+
+  <script>
+  const dateElement = document.getElementById("date");
+  const currentDate = new Date().toDateString();
+  dateElement.textContent = currentDate;
+</script>
+
+</body>
+</html>

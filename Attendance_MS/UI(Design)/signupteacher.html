@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher sign up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-box">
+        <h2>Teacher Sign Up</h2>
+        <form onsubmit="window.location.href='teacherdashboard.html'; return false;">
+            <input type="text" placeholder="Enter your full name" required>
+            <input type="text" placeholder="Enter Teacher ID" required>
+            <input type="text" placeholder="Enter Department" required>
+            <input type="email" placeholder="Enter your email" required>
+            <input type="password" placeholder="Create password" required>
+            
+            <label>Upload Profile Photo:</label>
+            <input type="file" accept="image/*" required>
+            
+            <button type="submit">Sign Up</button>
+        </form>
+        <p>Already have an account? <a href="login.html">Login</a></p>
+         
+
+    </div>
+   
+    
+</body>
+</html>
