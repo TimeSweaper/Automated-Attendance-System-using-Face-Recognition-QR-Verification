@@ -1,4 +1,4 @@
-# 🧠 Automated Attendance System using Face Recognition & QR Verification
+#  Automated Attendance System using Face Recognition & QR Verification
 
 ## 📋 Overview
 The **Automated Attendance System** is designed to modernize traditional attendance methods by leveraging **facial recognition** and **QR verification**.  
@@ -7,7 +7,7 @@ After scanning, the student’s **face is captured and verified** using machine 
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 - 👨‍🏫 **Teacher Dashboard:**  
   - View real-time student attendance.  
   - Start/stop attendance sessions.  
@@ -47,7 +47,6 @@ After scanning, the student’s **face is captured and verified** using machine 
 | `flask` | Temporary frontend-backend connection (testing) | 🔄 In Progress |
 
 ---
-
 ## 🧮 Working Principle
 1. **Teacher Login:**  
    The teacher starts a class session and generates a QR code valid for a short time.
@@ -80,7 +79,8 @@ After scanning, the student’s **face is captured and verified** using machine 
 - **Frameworks:** Django, Flask  
 - **Libraries:** OpenCV, NumPy, FaceNet-PyTorch, MTCNN, qrcode  
 - **Database:** MySQL  
-- **IDE:** Visual Studio Code / PyCharm  
+- **IDE:** Visual Studio Code
+- **Jupyter Notebook** For testing and checking if Euclidean distance work effectively or not  
 
 ---
 
