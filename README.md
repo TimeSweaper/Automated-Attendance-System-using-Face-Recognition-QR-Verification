@@ -34,17 +34,17 @@ After scanning, the student’s **face is captured and verified** using machine 
 
 | Module Name | Purpose / Usage | Status |
 |--------------|----------------|--------|
-| `mysql.connector` | Connect to MySQL database | ✅ Completed |
-| `json` | Store embedding of images | ✅ Completed |
-| `csv` | Export attendance data | ✅ Completed |
-| `os` | Directory creation for face data | ✅ Completed |
-| `numpy` | Perform Euclidean distance calculations | ✅ Completed |
-| `facenet_pytorch` | Access ML models (`MTCNN`, `InceptionResNetV1`) | ✅ Completed |
+| `mysql.connector` | Connecting database | ✅ Completed |
+| `json` | To store embedding of images| ✅ Completed |
+| `csv` | Convert attendance data into csv file | ✅ Completed |
+| `os` | Create Directory for storing (face data) | ✅ Completed |
+| `numpy` | Use in getting result of Euclidean distance. | ✅ Completed |
+| `facenet_pytorch` | Use to access model like MTCNN,InceptionResnetV1 | ✅ Completed |
 | `MTCNN` | Crop the detected face | ✅ Completed |
 | `InceptionResNetV1` | Generate face embeddings | ✅ Completed |
-| `qrcode` | Generate unique QR codes per session | ✅ Completed |
+| `qrcode` | Use to create QR code that is generated when teacher start their session | ✅ Completed |
 | `django` | Create full web-based UI | 🔄 In Progress |
-| `flask` | Temporary frontend-backend connection (testing) | 🔄 In Progress |
+| `flask` | Use to connect the front-end with backend | 🔄 In Progress |
 
 ---
 ## 🧮 Working Principle
