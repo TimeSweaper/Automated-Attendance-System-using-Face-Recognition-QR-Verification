@@ -80,7 +80,7 @@ After scanning, the student’s **face is captured and verified** using machine 
 - **Libraries:** OpenCV, NumPy, FaceNet-PyTorch, MTCNN, qrcode  
 - **Database:** MySQL  
 - **IDE:** Visual Studio Code
-- **Jupyter Notebook** For testing and checking if Euclidean distance work effectively or not  
+- **Jupyter Notebook:** For testing and checking if Euclidean distance work effectively or not  
 
 ---
 
