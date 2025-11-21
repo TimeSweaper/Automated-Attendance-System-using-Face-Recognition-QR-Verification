@@ -173,14 +173,5 @@ http://localhost:5001
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📝 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 📧 Support
-
-For issues or questions, please open an issue on GitHub or contact the maintainers.
-
----
 
 **Built with ❤️ using Flask and Face Recognition**
