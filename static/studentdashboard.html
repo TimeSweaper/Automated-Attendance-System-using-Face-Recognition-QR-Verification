@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <link rel="stylesheet" href="CSS/studentdashboard.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h1>Student Dashboard</h1>
+    </div>
+    <div class="card profile-card">
+      <div class="card-header">Profile</div>
+      <div class="profile">
+        <div class="profile-photo-wrap">
+          <div id="photoWrap">
+            <div id="photoPlaceholder" style="width:100px;height:100px;border-radius:16px;background:linear-gradient(135deg, #0c0c0c 0%, #2751da 100%);display:flex;align-items:center;justify-content:center;color:#3b82f6;font-weight:700;font-size:36px;border:3px solid white;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)">👤</div>
+          </div>
+          <div style="margin-top:12px; width:100%; display:flex; gap:8px; flex-direction:column; align-items:center;">
+            <label for="newPhoto" class="btn-ghost" style="cursor:pointer; padding:8px 12px; border-radius:8px; display:inline-block;">Change Photo</label>
+            <input type="file" id="newPhoto" accept="image/*" style="display:none;">
+            <div id="uploadStatus" style="font-size:13px; color:var(--muted); margin-top:6px;"></div>
+          </div>
+        </div>
+        <div class="profile-info">
+          <h2 id="stuName">Student Name</h2>
+          <div id="stuEmail" class="small">email@example.com</div>
+          <div class="info-row">
+            <div class="info-item"><strong>Course:</strong> <span id="stuCourse">-</span></div>
+            <div class="info-item"><strong>Subjects:</strong> <span id="stuSubjects">-</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">Join Session</div>
+      <div class="session-row">
+        <input id="sessionInput" placeholder="Enter Session ID or scan QR code" />
+        <button id="scanQRBtn">Scan QR</button>
+      </div>
+      <div class="video-wrap" id="videoWrap">
+        <video id="studentVideo" autoplay playsinline muted></video>
+        <div class="video-overlay" id="videoOverlay">Camera not started</div>
+      </div>
+      <div class="controls">
+        <button id="startCam" class="btn-primary">Start Camera</button>
+        <button id="captureMark" class="btn-ghost" disabled>Capture & Mark Present</button>
+      </div>
+      <div id="markResult"></div>
+    </div>
+    <div class="card summary">
+      <div class="summary-header">
+        <div class="card-header" style="margin:0">Total Attendance</div>
+        <div id="lastUpdated" class="small">-</div>
+      </div>
+      
+      <div class="overall-card">
+        <div class="label">Overall Attendance</div>
+        <div class="percentage" id="overallPercentage">--%</div>
+        <div class="stats" id="overallStats">-- / -- sessions</div>
+      </div>
+
+      <table class="subjects-table">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Present</th>
+            <th>Total</th>
+            <th>Attendance</th>
+          </tr>
+        </thead>
+        <tbody id="attendance_subjects">
+          <tr><td colspan="4" class="small" style="text-align:center;padding:24px">Loading attendance data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="logout-section">
+      <a href="login.html" style="text-decoration:none">
+        <button class="logout-btn">Logout</button>
+      </a>
+    </div>
+  </div>
+
+  <div id="qrModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Scan QR Code</h3>
+        <button class="close-btn" id="closeQRModal">&times;</button>
+      </div>
+      <video id="qrVideo" autoplay playsinline></video>
+      <div id="qrResult"></div>
+    </div>
+  </div>
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+(async function(){
+  const API = window.location.origin;
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  
+  if (!user || user.role !== 'student') {
+    alert('Please login as a student first');
+    window.location.href = 'login.html';
+    return;
+  }
+
+  const sid = user.id;
+  const photoWrap = document.getElementById('photoWrap');
+  const stuName = document.getElementById('stuName');
+  const stuEmail = document.getElementById('stuEmail');
+  const stuCourse = document.getElementById('stuCourse');
+  const stuSubjects = document.getElementById('stuSubjects');
+  const overallPercentage = document.getElementById('overallPercentage');
+  const overallStats = document.getElementById('overallStats');
+  const tbody = document.getElementById('attendance_subjects');
+  const lastUpdated = document.getElementById('lastUpdated');
+
+  const socket = io(API);
+  socket.emit('join_student_room', { student_id: sid });
+
+  socket.on('attendance_summary_updated', (data) => {
+    console.log('Received real-time summary update:', data);
+    if (data.student_id === sid && data.summary) {
+      renderAttendanceSummary(data.summary);
+    }
+  });
+
+  async function loadProfile(){
+    try {
+      const res = await fetch(`${API}/api/student/${sid}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      const data = await res.json();
+      console.log('Student data received:', data);
+      
+      if (data && data.success && data.student) {
+        const s = data.student;
+        stuName.innerText = s.name || user.name || 'Student';
+        stuEmail.innerText = s.email || user.email || '-';
+        stuCourse.innerText = s.course || 'Not specified';
+        stuSubjects.innerText = s.subjects || 'Not specified';
+    
+        const frontPath = s.photo_path;
+        const backPath = s.photo_back_path;
+        
+        console.log('Student photo paths:', { front: frontPath, back: backPath });
+        
+        if (frontPath) {
+          const img = document.createElement('img');
+          img.src = `${API}/${frontPath}?t=${Date.now()}`;
+          img.className = 'profile-photo';
+          img.alt = 'Student photo';
+          img.style.objectFit = 'cover';
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.borderRadius = '16px';
+          
+          img.onerror = () => {
+            console.error('Failed to load photo from:', frontPath);
+            if (backPath && backPath !== frontPath) {
+              console.log('Fallback to processed photo');
+              img.src = `${API}/${backPath}?t=${Date.now()}`;
+            }
+          };
+          
+          photoWrap.innerHTML = '';
+          photoWrap.appendChild(img);
+        } else if (backPath) {
+          const img = document.createElement('img');
+          img.src = `${API}/${backPath}?t=${Date.now()}`;
+          img.className = 'profile-photo';
+          img.alt = 'Student photo';
+          img.style.objectFit = 'cover';
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.borderRadius = '16px';
+          photoWrap.innerHTML = '';
+          photoWrap.appendChild(img);
+        } else {
+          console.warn('No photo available for student');
+        }
+      } else {
+        stuName.innerText = user.name || 'Student';
+        stuEmail.innerText = user.email || '-';
+      }
+    } catch(e){
+      console.error('Profile load error:', e);
+      stuName.innerText = user.name || 'Student';
+      stuEmail.innerText = user.email || '-';
+      stuCourse.innerText = 'Error loading data';
+      stuSubjects.innerText = 'Error loading data';
+    }
+  }
+
+  async function loadAttendance(){
+    try {
+      const res = await fetch(`${API}/api/student/me/attendance/summary?student_id=${sid}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      
+      const data = await res.json();
+      console.log('Attendance data received:', data);
+      renderAttendanceSummary(data);
+    } catch(e){
+      console.error('Attendance load error:', e);
+      tbody.innerHTML = '<tr><td colspan="4" class="small" style="text-align:center;padding:24px;color:#ef4444;">Failed to load attendance data</td></tr>';
+    }
+  }
+
+  function renderAttendanceSummary(data) {
+    if (!data || !data.overall) {
+      tbody.innerHTML = '<tr><td colspan="4" class="small" style="text-align:center;padding:24px">No attendance data available</td></tr>';
+      return;
+    }
+
+    const overall = data.overall;
+    overallPercentage.innerText = `${overall.percentage}%`;
+    overallStats.innerText = `${overall.present} / ${overall.total} sessions`;
+
+    if (data.subjects && data.subjects.length > 0) {
+      tbody.innerHTML = data.subjects.map(sub => {
+        let badgeClass = 'percentage-low';
+        if (sub.percentage >= 75) badgeClass = 'percentage-high';
+        else if (sub.percentage >= 60) badgeClass = 'percentage-medium';
+        
+        return `
+          <tr>
+            <td><strong>${sub.subject || 'Unknown'}</strong></td>
+            <td>${sub.present}</td>
+            <td>${sub.total}</td>
+            <td><span class="percentage-badge ${badgeClass}">${sub.percentage}%</span></td>
+          </tr>
+        `;
+      }).join('');
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" class="small" style="text-align:center;padding:24px">No subject data available yet</td></tr>';
+    }
+
+    lastUpdated.innerText = `Last updated: ${new Date().toLocaleString()}`;
+  }
+
+  await loadProfile();
+  await loadAttendance();
+
+  const newPhotoInput = document.getElementById('newPhoto');
+  const uploadStatus = document.getElementById('uploadStatus');
+
+  newPhotoInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      uploadStatus.innerHTML = '<span style="color:#ef4444;">Please select a valid image file</span>';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      uploadStatus.innerHTML = '<span style="color:#ef4444;">Image size must be less than 5MB</span>';
+      return;
+    }
+
+    uploadStatus.innerHTML = '<span style="color:#3b82f6;">Uploading...</span>';
+
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    try {
+      const res = await fetch(`${API}/api/student/${sid}/upload-photo`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        uploadStatus.innerHTML = '<span style="color:#10b981;">✓ Photo updated successfully!</span>';
+        
+        const img = document.createElement('img');
+        img.src = `${API}/${data.photo_path}?t=${Date.now()}`;
+        img.className = 'profile-photo';
+        img.alt = 'Student photo';
+        img.style.objectFit = 'cover';
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.borderRadius = '16px';
+        photoWrap.innerHTML = '';
+        photoWrap.appendChild(img);
+
+        setTimeout(() => {
+          uploadStatus.innerHTML = '';
+        }, 3000);
+      } else {
+        uploadStatus.innerHTML = `<span style="color:#ef4444;">Upload failed: ${data.error || data.message || 'Unknown error'}</span>`;
+      }
+    } catch (err) {
+      console.error('Upload error:', err);
+      uploadStatus.innerHTML = '<span style="color:#ef4444;">Upload failed. Please try again.</span>';
+    }
+
+    newPhotoInput.value = '';
+  });
+
+  const qrModal = document.getElementById('qrModal');
+  const qrVideo = document.getElementById('qrVideo');
+  const qrResult = document.getElementById('qrResult');
+  const scanQRBtn = document.getElementById('scanQRBtn');
+  const closeQRModal = document.getElementById('closeQRModal');
+  const sessionInput = document.getElementById('sessionInput');
+  
+  let qrCodeReader = null;
+  let qrStream = null;
+
+  scanQRBtn.addEventListener('click', async () => {
+    qrModal.classList.add('active');
+    qrResult.style.display = 'none';
+    
+    try {
+      qrStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' } 
+      });
+      qrVideo.srcObject = qrStream;
+      
+      qrCodeReader = new ZXing.BrowserQRCodeReader();
+      
+      qrCodeReader.decodeFromVideoDevice(null, qrVideo, (result, err) => {
+        if (result) {
+          const sessionId = result.text;
+          sessionInput.value = sessionId;
+          qrResult.textContent = `✓ Session ID: ${sessionId}`;
+          qrResult.style.display = 'block';
+          
+          setTimeout(() => closeQRScanner(), 2000);
+        }
+      });
+    } catch (err) {
+      alert('Camera access denied or not available: ' + err.message);
+      closeQRScanner();
+    }
+  });
+
+  function closeQRScanner() {
+    if (qrCodeReader) {
+      qrCodeReader.reset();
+      qrCodeReader = null;
+    }
+    if (qrStream) {
+      qrStream.getTracks().forEach(track => track.stop());
+      qrStream = null;
+    }
+    qrModal.classList.remove('active');
+  }
+
+  closeQRModal.addEventListener('click', closeQRScanner);
+  qrModal.addEventListener('click', (e) => {
+    if (e.target === qrModal) closeQRScanner();
+  });
+
+  const video = document.getElementById('studentVideo');
+  const videoOverlay = document.getElementById('videoOverlay');
+  let stream = null;
+  const startBtn = document.getElementById('startCam');
+  const captureBtn = document.getElementById('captureMark');
+  const markResult = document.getElementById('markResult');
+
+  startBtn.addEventListener('click', async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: { ideal:1280 }, height: { ideal:720 }, facingMode: 'user' }, 
+        audio: false 
+      });
+      video.srcObject = stream;
+      await video.play();
+      videoOverlay.style.display = 'none';
+      startBtn.disabled = true;
+      captureBtn.disabled = false;
+      markResult.innerHTML = `<div class="alert alert-info">Camera started successfully. You can now mark attendance.</div>`;
+    } catch (err) {
+      console.error(err);
+      videoOverlay.textContent = 'Unable to access camera';
+      markResult.innerHTML = `<div class="alert alert-error">Failed to start camera: ${err.message}</div>`;
+    }
+  });
+
+  captureBtn.addEventListener('click', async () => {
+    if (!video || !stream) {
+      alert('Camera not started.');
+      return;
+    }
+    const sessionId = sessionInput.value.trim();
+    if (!sessionId) {
+      alert('Please enter or scan a valid session ID.');
+      return;
+    }
+
+    captureBtn.disabled = true;
+    markResult.innerHTML = `<div class="alert alert-info">Processing attendance... Please wait.</div>`;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+
+    canvas.toBlob(async (blob) => {
+      const formData = new FormData();
+      formData.append('session_id', sessionId);
+      formData.append('photo', blob, 'capture.jpg');
+
+      try {
+        const res = await fetch(`${API}/api/attendance/mark-face`, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          markResult.innerHTML = `
+            <div class="alert alert-success">
+              Attendance marked for <strong>${data.student?.name || 'You'}</strong>
+              <br>Distance score: ${data.dist?.toFixed(3) || 'N/A'}
+            </div>`;
+          await loadAttendance();
+        } else {
+          markResult.innerHTML = `
+            <div class="alert alert-error">
+              ✗ Failed to mark attendance (${data.reason || 'unknown reason'}).
+            </div>`;
+        }
+      } catch (err) {
+        console.error(err);
+        markResult.innerHTML = `<div class="alert alert-error">Error uploading photo: ${err.message}</div>`;
+      } finally {
+        captureBtn.disabled = false;
+      }
+    }, 'image/jpeg');
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    if (qrStream) {
+      qrStream.getTracks().forEach(track => track.stop());
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Sign Up</title>
+  <link rel="stylesheet" href="CSS/signupteacher.css"
+</head>
+<body>
+  <div class="login-box">
+    <h2>Teacher Sign Up</h2>
+    
+    <div class="success-message" id="successMessage">
+      Registration successful! Redirecting to login...
+    </div>
+
+    <form id="teacherForm">
+      <div class="form-group">
+        <label for="name">Full Name </label>
+        <input id="name" name="name" type="text" placeholder="" required />
+        <div class="error-message" id="nameError">Please enter your full name</div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address </label>
+        <input id="email" name="email" type="email" placeholder="" required />
+        <div class="error-message" id="emailError">Please enter a valid email address</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password </label>
+        <input id="password" name="password" type="password" placeholder="" required />
+        <div class="password-strength" id="passwordStrength">
+          <div class="password-strength-bar"></div>
+        </div>
+        <div class="error-message" id="passwordError">Create strong 6 digit password</div>
+      </div>
+
+      <div class="form-group">
+        <label for="department">Department</label>
+        <input id="department" name="department" type="text" placeholder="" />
+      </div>
+
+      <div class="form-group">
+        <label>Profile Photo</label>
+        <div class="file-upload-wrapper">
+          <label for="photo" class="file-upload-label" id="fileLabel">
+            <span class="upload-icon">📷</span>
+            <span id="fileName">Choose a photo</span>
+          </label>
+          <input type="file" id="photo" name="photo" accept="image/*" />
+        </div>
+      </div>
+
+      <button type="submit" id="teacherSubmit">
+        Sign Up
+      </button>
+    </form>
+
+    <p class="footer-text">
+      Already have an account? <a href="login.html">Login here</a>
+    </p>
+  </div>
+
+  <script>
+    const API = location.origin;
+    const form = document.getElementById('teacherForm');
+    const submitBtn = document.getElementById('teacherSubmit');
+    const passwordInput = document.getElementById('password');
+    const passwordStrength = document.getElementById('passwordStrength');
+    const fileInput = document.getElementById('photo');
+    const fileLabel = document.getElementById('fileLabel');
+    const fileName = document.getElementById('fileName');
+    const successMessage = document.getElementById('successMessage');
+
+    passwordInput.addEventListener('input', (e) => {
+      const password = e.target.value;
+      if (password.length === 0) {
+        passwordStrength.style.display = 'none';
+        passwordStrength.className = 'password-strength';
+        return;
+      }
+
+      passwordStrength.style.display = 'block';
+      
+      let strength = 0;
+      if (password.length >= 6) strength++;
+      if (password.length >= 10) strength++;
+      if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+      if (/\d/.test(password)) strength++;
+      if (/[^a-zA-Z\d]/.test(password)) strength++;
+
+      if (strength <= 2) {
+        passwordStrength.className = 'password-strength weak';
+      } else if (strength <= 4) {
+        passwordStrength.className = 'password-strength medium';
+      } else {
+        passwordStrength.className = 'password-strength strong';
+      }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        const file = e.target.files[0];
+        fileName.textContent = file.name;
+        fileLabel.classList.add('has-file');
+      } else {
+        fileName.textContent = 'Choose a photo';
+        fileLabel.classList.remove('has-file');
+      }
+    });
+
+    function validateForm() {
+      let isValid = true;
+      
+      document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+      
+      const name = document.getElementById('name').value.trim();
+      if (name.length < 2) {
+        document.getElementById('nameError').style.display = 'block';
+        isValid = false;
+      }
+      
+      const email = document.getElementById('email').value.trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        document.getElementById('emailError').style.display = 'block';
+        isValid = false;
+      }
+      
+      const password = document.getElementById('password').value;
+      if (password.length < 6) {
+        document.getElementById('passwordError').style.display = 'block';
+        isValid = false;
+      }
+      
+      return isValid;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      if (!validateForm()) {
+        return;
+      }
+
+      const fd = new FormData(form);
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span>Registering...';
+
+      try {
+        const res = await fetch(`${API}/api/register/teacher`, { 
+          method: 'POST', 
+          body: fd 
+        });
+        
+        const data = await res.json();
+        
+        if (!res.ok) {
+          alert(data.error || 'Registration failed. Please try again.');
+          return;
+        }
+        
+        successMessage.style.display = 'block';
+        form.style.display = 'none';
+        
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+        
+      } catch (e) {
+        alert('Network error. Please check your connection and try again.');
+        console.error('Registration error:', e);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Sign Up';
+      }
+    });
+
+    document.getElementById('email').addEventListener('blur', function() {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (this.value && !emailRegex.test(this.value)) {
+        document.getElementById('emailError').style.display = 'block';
+      } else {
+        document.getElementById('emailError').style.display = 'none';
+      }
+    });
+
+    document.getElementById('name').addEventListener('blur', function() {
+      if (this.value.trim().length < 2) {
+        document.getElementById('nameError').style.display = 'block';
+      } else {
+        document.getElementById('nameError').style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
