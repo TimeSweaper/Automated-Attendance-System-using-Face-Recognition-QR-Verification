@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Teacher Dashboard — Attendance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="CSS/teacherdashboard.css">
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        👨‍🏫 Teacher Dashboard
+      </div>
+      <div class="topbar-right">
+        <div id="teacherEmailTop" class="small"></div>
+        <a href="login.html" style="text-decoration:none">
+          <button class="logout-btn">Logout</button>
+        </a>
+      </div>
+    </div>
+
+    <div class="card teacher-panel">
+      <div class="card-header">Profile</div>
+      <div class="teacher-row">
+        <div class="teacher-photo-wrap">
+          <div id="teacherPhotoWrap">
+            <div style="width:100px;height:100px;border-radius:16px;background:linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);display:flex;align-items:center;justify-content:center;color:#3b82f6;font-weight:700;font-size:36px;border:3px solid white;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)">👨‍🏫</div>
+          </div>
+          <div class="teacher-badge">Teacher</div>
+        </div>
+        <div class="meta">
+          <h2 id="teacherName">Teacher Name</h2>
+          <p id="teacherEmail" class="small">email@example.com</p>
+          <div class="info-tags">
+            <div class="info-tag">
+              <strong>Department:</strong> <span id="teacherDept">-</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-header" style="margin-top:32px">Start Session</div>
+      <div class="controls">
+        <div class="control-group">
+          <label class="control-label">Subject</label>
+          <input id="subjectInput" />
+        </div>
+        <div class="control-group">
+          <label class="control-label">Section</label>
+          <input id="sectionInput" />
+        </div>
+      </div>
+
+     <div class="action-buttons">
+  <button id="startSessionBtn" class="btn-success large-btn">Start Session</button>
+  <button id="lockBtn" class="btn-primary large-btn">Lock Session</button>
+  <button id="stopBtn" class="btn-danger large-btn">Stop Session</button>
+  </div>
+
+      <div id="qrSection" style="display:none" class="qr-section">
+        <div id="qrWrap" class="qr-wrap"></div>
+      </div>
+
+      <div class="card-header" style="margin-top:32px">Download Attendance</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <input id="exportSession" placeholder="Enter Session ID" style="flex:1;padding:14px 18px;border-radius:12px;border:2px solid #e2e8f0;font-size:15px;font-family:inherit;background:#f8fafc" />
+        <button id="exportBtn" class="btn-ghost" style="padding:14px 24px;border-radius:12px">Download</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">Live Session Screen</div>
+      <div class="monitor-section">
+        <input id="joinSessionId" placeholder="Enter Session ID" />
+        <button id="joinSessionBtn" class="btn-primary">Join Session</button>
+        <button id="leaveSessionBtn" class="btn-ghost">Leave</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Marked At</th>
+              <th>Status</th>
+              <th>Method</th>
+              <th>Name</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceBody">
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="empty-state-icon">📋</div>
+                  <div>No attendance records yet</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+<script>
+(async function(){
+  const API = location.origin;
+  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  if (!user) {
+   
+  }
+
+  const teacherPhotoWrap = document.getElementById('teacherPhotoWrap');
+  const teacherName = document.getElementById('teacherName');
+  const teacherEmail = document.getElementById('teacherEmail');
+  const teacherDept = document.getElementById('teacherDept');
+  const teacherEmailTop = document.getElementById('teacherEmailTop');
+  const attendanceBody = document.getElementById('attendanceBody');
+  const qrWrap = document.getElementById('qrWrap');
+  const qrSection = document.getElementById('qrSection');
+
+  const tid = user?.id || 1;
+  
+  async function loadProfile(){
+    try {
+      const r = await fetch(`${API}/api/teacher/${tid}`);
+      const j = await r.json();
+      if (j && j.success && j.teacher) {
+        const t = j.teacher;
+        teacherName.innerText = t.name || user?.name || 'Teacher';
+        teacherEmail.innerText = t.email || '-';
+        teacherDept.innerText = t.department || '-';
+        teacherEmailTop.innerText = t.email || '';
+        if (t.photo_path) {
+          const img = document.createElement('img');
+          img.src = t.photo_path;
+          img.className = 'teacher-photo';
+          img.alt = 'photo';
+          teacherPhotoWrap.innerHTML = '';
+          teacherPhotoWrap.appendChild(img);
+        }
+      } else {
+        teacherName.innerText = user?.name || 'Teacher';
+      }
+    } catch(e){
+      console.warn('profile load failed', e);
+    }
+  }
+  await loadProfile();
+
+  const socket = io(API, { transports:['websocket','polling'] });
+
+  function addAttendanceRow(item){
+    const emptyState = attendanceBody.querySelector('.empty-state');
+    if (emptyState) {
+      attendanceBody.innerHTML = '';
+    }
+    
+    const tr = document.createElement('tr');
+    const statusClass = item.status === 'present' ? 'status-present' : 'status-absent';
+    tr.innerHTML = `
+      <td style="font-weight:600">${item.id||''}</td>
+      <td>${item.marked_at||''}</td>
+      <td><span class="status-badge ${statusClass}">${item.status||''}</span></td>
+      <td><span class="method-badge">${item.method||''}</span></td>
+      <td style="font-weight:600">${item.name||''}</td>
+      <td class="small">${item.email||''}</td>
+    `;
+    attendanceBody.insertBefore(tr, attendanceBody.firstChild);
+  }
+
+  document.getElementById('joinSessionBtn').addEventListener('click', () => {
+    const sid = document.getElementById('joinSessionId').value.trim();
+    if (!sid) return alert('Enter session id');
+    socket.emit('join_session', { session_id: sid });
+    alert('Joined session ' + sid);
+  });
+
+  document.getElementById('leaveSessionBtn').addEventListener('click', () => {
+    const sid = document.getElementById('joinSessionId').value.trim();
+    if (!sid) return alert('Enter session id');
+    socket.emit('leave_session', { session_id: sid });
+    alert('Left session ' + sid);
+  });
+
+  socket.on('attendance_snapshot', payload => {
+    attendanceBody.innerHTML = '';
+    if (!payload.attendance || payload.attendance.length === 0) {
+      attendanceBody.innerHTML = `
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <div>No attendance records for this session</div>
+            </div>
+          </td>
+        </tr>
+      `;
+    } else {
+      payload.attendance.forEach(item => addAttendanceRow(item));
+    }
+  });
+
+  socket.on('attendance_marked', payload => {
+    addAttendanceRow({
+      id: payload.student?.id || '',
+      marked_at: new Date().toLocaleString(),
+      status: payload.status,
+      method: payload.method,
+      name: payload.student?.name,
+      email: payload.student?.email
+    });
+  });
+
+  document.getElementById('startSessionBtn').addEventListener('click', async () => {
+    const subject = document.getElementById('subjectInput').value.trim();
+    const section = document.getElementById('sectionInput').value.trim();
+    if (!subject) return alert('Please enter a subject');
+    
+    try {
+      const res = await fetch(`${API}/api/session/start`, {
+        method:'POST', 
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ 
+          teacher_email: teacherEmail.innerText, 
+          subject, 
+          section 
+        })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) return alert(data.error || JSON.stringify(data));
+      
+      alert('✅ Session started successfully!');
+      
+      if (data.qr && data.session) {
+        qrSection.style.display = 'block';
+        qrWrap.innerHTML = `
+          <div class="qr-container">
+            <a href="${data.qr}" target="_blank">
+              <img src="${data.qr}" alt="QR Code"/>
+            </a>
+          </div>
+          <div class="qr-info">
+            <h3>📱 Session Active</h3>
+            <p><strong>Subject:</strong> ${subject}</p>
+            <p><strong>Section:</strong> ${section || 'N/A'}</p>
+            <div class="session-id-display">${data.session.id}</div>
+            <p style="margin-top:12px" class="small"></p>
+          </div>
+        `;
+      }
+    } catch(e){
+      alert('Network error');
+      console.error(e);
+    }
+  });
+
+  document.getElementById('lockBtn').addEventListener('click', async ()=> {
+    const sid = prompt('Enter session ID to lock:');
+    if (!sid) return;
+    
+    try {
+      await fetch(`${API}/api/session/lock`, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({ session_id: sid }) 
+      });
+      alert('🔒 Locked session ' + sid);
+    } catch(e) {
+      alert('Error locking session');
+    }
+  });
+
+  document.getElementById('stopBtn').addEventListener('click', async ()=> {
+    const sid = prompt('Enter session ID to stop:');
+    if (!sid) return;
+    
+    try {
+      await fetch(`${API}/api/session/stop`, { 
+        method:'POST', 
+        headers:{'Content-Type':'application/json'}, 
+        body: JSON.stringify({ session_id: sid }) 
+      });
+      alert('⏹️ Stopped session ' + sid);
+      qrSection.style.display = 'none';
+    } catch(e) {
+      alert('Error stopping session');
+    }
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', ()=> {
+    const sid = document.getElementById('exportSession').value.trim();
+    if (!sid) return alert('Please enter a session ID');
+    window.open(`${API}/api/session/export/${sid}`, '_blank');
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+-- schema.sql
+
+CREATE DATABASE IF NOT EXISTS attendance_db;
+USE attendance_db;
+
+-- teachers
+DROP TABLE IF EXISTS teachers;
+CREATE TABLE teachers (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  teacher_id VARCHAR(100) UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  department VARCHAR(255),
+  photo_path VARCHAR(512),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- students
+DROP TABLE IF EXISTS students;
+CREATE TABLE students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  student_id VARCHAR(100) UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  department VARCHAR(255),
+  course VARCHAR(255),
+  subjects VARCHAR(255),
+  photo_path VARCHAR(512),
+  face_encoding JSON,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- session
+DROP TABLE IF EXISTS session;
+CREATE TABLE session (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  teacher_id INT NOT NULL,
+  code VARCHAR(100),
+  subject VARCHAR(255),
+  section VARCHAR(255),
+  locked TINYINT DEFAULT 0,
+  started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  ended_at DATETIME DEFAULT NULL,
+  FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
+);
+
+-- attendance
+DROP TABLE IF EXISTS attendance;
+CREATE TABLE attendance (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  sessionID INT NOT NULL,
+  studentID INT NOT NULL,
+  status VARCHAR(32) NOT NULL,
+  method VARCHAR(50),
+  device_info VARCHAR(255),
+  marked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_session_student (sessionID, studentID),
+  FOREIGN KEY (sessionID) REFERENCES session(id) ON DELETE CASCADE,
+  FOREIGN KEY (studentID) REFERENCES students(id) ON DELETE CASCADE
+);

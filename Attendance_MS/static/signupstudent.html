@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Student Sign Up - Attendance System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="CSS/signupstudent.css">
+</head>
+<body>
+  <div class="signup-container">
+    <div class="signup-header">
+      <h1>👨‍🎓 Student Registration</h1>
+    </div>
+    
+    <div class="signup-box">
+      <h2>Sign Up</h2>
+      
+      <form id="stuForm" onsubmit="return false;">
+        <input id="stu_name" placeholder="Full name" required />
+        <input id="stu_id" placeholder="Student ID" required />
+        <input id="stu_course" placeholder="Section" />
+        <input id="stu_subjects" placeholder="Subject" />
+        <input id="stu_email" placeholder="Email address" type="email" required />
+        <input id="stu_password" placeholder="Create a password" type="password" required />
+        
+        <div class="camera-section">
+          <label class="camera-label">📸 Profile Photo </label>
+          <video id="stuVideo" autoplay playsinline muted></video>
+          <div class="camera-controls">
+            <button id="startStuCam" class="btn-secondary" type="button">🎥 Start Camera</button>
+          </div>
+        </div>
+        
+        <button id="captureRegister" class="btn-primary" type="button">✨ Capture & Register</button>
+      </form>
+      
+      <div class="back-link">
+        <p>Already have an account? <a href="login.html">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+<script>
+const API = location.origin;
+let stream = null;
+const video = document.getElementById('stuVideo');
+
+document.getElementById('startStuCam').addEventListener('click', async (e) => {
+  e.preventDefault();
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } }
+    });
+    video.srcObject = stream;
+    await video.play();
+    e.target.innerText = 'Camera Active';
+    e.target.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+    e.target.style.color = 'white';
+  } catch (err) { 
+    alert('Cannot access camera: ' + err.message); 
+  }
+});
+
+function captureBlob() {
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  return new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.9));
+}
+
+document.getElementById('captureRegister').addEventListener('click', async (e) => {
+  e.preventDefault();
+  
+  if (!stream) { 
+    alert('Please start the camera first'); 
+    return; 
+  }
+  
+  const name = document.getElementById('stu_name').value.trim();
+  const sid = document.getElementById('stu_id').value.trim();
+  const course = document.getElementById('stu_course').value.trim();
+  const email = document.getElementById('stu_email').value.trim();
+  const subjects = document.getElementById('stu_subjects').value;
+  const pass = document.getElementById('stu_password').value;
+  if (!name || !sid || !email || !pass || !subjects)  { 
+    alert('Please fill all required fields'); 
+    return; 
+  }
+  
+  try {
+    const blob = await captureBlob();
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('student_id', sid);
+    fd.append('course', course);
+    fd.append('subjects', subjects);
+    fd.append('email', email);
+    fd.append('password', pass);
+    fd.append('photo', blob, 'photo.jpg');
+    
+    const btn = document.getElementById('captureRegister');
+    btn.disabled = true; 
+    btn.innerText = '⏳ Registering...';
+    
+    const res = await fetch(`${API}/api/register/student`, { method: 'POST', body: fd });
+    const data = await res.json();
+    
+    if (!res.ok) { 
+      alert('❌ ' + (data.error || 'Registration failed')); 
+      btn.disabled = false;
+      btn.innerText = '✨ Capture & Register';
+      return; 
+    }
+    
+    alert('✅ Student registered successfully! Please login.');
+    window.location.href = 'login.html';
+  } catch (e) { 
+    alert('❌ Network error. Please try again.'); 
+    document.getElementById('captureRegister').disabled = false;
+    document.getElementById('captureRegister').innerText = '✨ Capture & Register';
+  }
+});
+</script>
+</body>
+</html>
