@@ -36,7 +36,7 @@ A Flask + MySQL based attendance system that uses Face Recognition to automatica
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/yourrepo.git
+git clone https://github.com/TimeSweaper/Automated-Attendance-System-using-Face-Recognition-QR-Verification.git
 cd yourrepo
 ```
 
